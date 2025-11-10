@@ -1,6 +1,6 @@
 import React from "react";
 
-import DataTablePropsType from "@/types/DataTablePropsType";
+import DataTablePropsType from "@/types/uiTypes/DataTablePropsType";
 
 const DataTable = <TData, TValue>({
   columns,

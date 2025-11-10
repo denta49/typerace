@@ -1,8 +1,7 @@
-import PlayerType from "@/types/dataTypes/PlayerType";
 import TypingStateType from "@/types/StoresTypes/TypingStateType";
-
+import { PlayerRow } from "@/validation/db";
 type LivePlayerType = {
-  username: PlayerType["username"];
+  username: PlayerRow["username"];
   progressText: TypingStateType["typed"];
   wpm: TypingStateType["wpm"];
   accuracy: TypingStateType["accuracy"];

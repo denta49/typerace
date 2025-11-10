@@ -1,7 +1,7 @@
-import SentenceType from "@/types/dataTypes/SentenceType";
+import { SentenceRow } from "@/validation/db";
 
 type TypingEngineType = {
-  sentence: SentenceType["text"];
+  sentence: SentenceRow["text"];
   round: {
     elapsedMs: number;
     totalMs: number;

@@ -1,14 +1,14 @@
-import ResultType from "@/types/dataTypes/ResultType";
-import SentenceType from "@/types/dataTypes/SentenceType";
+import { ResultInsert } from "@/validation/db";
+import { SentenceRow } from "@/validation/db";
 
 type TypingStateType = {
   typed: string;
-  correctChars: ResultType["correctChars"];
-  totalChars: ResultType["totalChars"];
-  wpm: ResultType["wpm"];
-  accuracy: ResultType["accuracy"];
+  correctChars: ResultInsert["correct_chars"];
+  totalChars: ResultInsert["total_chars"];
+  wpm: ResultInsert["wpm"];
+  accuracy: ResultInsert["accuracy"];
   reset: () => void;
-  updateFromInput: (sentence: SentenceType["text"], input: string, elapsedMs: number) => void;
+  updateFromInput: (sentence: SentenceRow["text"], input: string, elapsedMs: number) => void;
 };
 
 export default TypingStateType;

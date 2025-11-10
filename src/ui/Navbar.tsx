@@ -2,7 +2,7 @@
 import React, { FunctionComponent } from "react";
 
 import { Button } from "@/components/ui/button";
-import NavbarPropsType from "@/types/NavbarPropsType";
+import NavbarPropsType from "@/types/uiTypes/NavbarPropsType";
 
 const Navbar: FunctionComponent<NavbarPropsType> = ({ title, username, onOpenAuth }) => {
   return (

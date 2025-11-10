@@ -1,7 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { LiveRowType } from "@/types/LiveRowType";
+import { LiveRowType } from "@/types/uiTypes/LiveRowType";
 
 const ColumnsAllTime: ColumnDef<LiveRowType>[] = [];
 

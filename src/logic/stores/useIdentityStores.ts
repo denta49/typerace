@@ -7,6 +7,7 @@ import IdentityStateType from "@/types/StoresTypes/IdentityStateType";
 const useIdentityStore = create<IdentityStateType>()(
   persist(
     (set) => ({
+      id: null,
       kind: "guest",
       guestId: null,
       userId: null,

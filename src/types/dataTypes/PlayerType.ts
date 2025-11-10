@@ -1,8 +1,7 @@
 type Player = {
-  userId: string;
-  guestId: string;
+  userId?: string | null;
+  guestId?: string | null;
   kind: "user" | "guest";
   username: string;
-  avatarUrl: string;
 };
 export default Player;

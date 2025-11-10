@@ -1,5 +1,5 @@
 type Player = {
-  id: string;
+  id?: string | null;
   userId?: string | null;
   guestId?: string | null;
   kind: "user" | "guest";

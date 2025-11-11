@@ -11,6 +11,7 @@ type IdentityState = {
   setUsername: (username: PlayerRow["username"]) => void;
   setGuest: (guestId: NonNullable<PlayerRow["guest_id"]>) => void;
   setUser: (userId: NonNullable<PlayerRow["user_id"]>) => void;
+  setPlayerId: (playerId: NonNullable<PlayerRow["id"]>) => void;
   reset: () => void;
 };
 

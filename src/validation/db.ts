@@ -8,7 +8,7 @@ export const PlayerRowSchema = z.object({
   user_id: z.string().uuid().nullable(),
   guest_id: z.string().uuid().nullable(),
   username: z.string(),
-  color: z.string(),
+
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -19,7 +19,6 @@ export const PlayerInsertSchema = z.object({
   user_id: z.string().uuid().optional().nullable(),
   guest_id: z.string().uuid().optional().nullable(),
   username: z.string().min(1),
-  color: z.string().min(1),
 });
 export type PlayerInsert = z.infer<typeof PlayerInsertSchema>;
 
@@ -86,7 +85,6 @@ export const ThisRoundJoinedRowSchema = ResultRowSchema.pick({
   created_at: true,
 }).extend({
   username: z.string(),
-  color: z.string(),
 });
 export type ThisRoundJoinedRow = z.infer<typeof ThisRoundJoinedRowSchema>;
 

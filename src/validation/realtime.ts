@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const ProgressPayloadSchema = z.object({
-  playerId: z.string().uuid(),
+  playerId: z.string().min(1),
+  clientId: z.string().min(1), // ⬅️ nowość
   username: z.string().min(1),
   roundId: z.string(),
   progressText: z.string().max(120),

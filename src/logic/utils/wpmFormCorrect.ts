@@ -1,6 +1,5 @@
 const wpmFromCorrect = (correctChars: number, elapsedMs: number) => {
-  // TODO: (correctChars/5) / (elapsedMs/60000)
-  return 0;
+  if (elapsedMs <= 0) return 0;
+  return correctChars / 5 / (elapsedMs / 60000);
 };
-
 export default wpmFromCorrect;

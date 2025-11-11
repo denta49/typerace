@@ -6,6 +6,8 @@ type LivePlayerType = {
   wpm: TypingStateType["wpm"];
   accuracy: TypingStateType["accuracy"];
   updatedAt: number;
+  playerId: PlayerRow["id"];
+  clientId: string;
 };
 
 export default LivePlayerType;

@@ -1,6 +1,23 @@
 "use client";
-const useGameSettingsQuery = () => {
-  // TODO: select round_length_sec from game_settings limit 1
-  return { data: { roundLengthSec: 60 }, isLoading: false, error: null as unknown };
+import { useQuery } from "@tanstack/react-query";
+
+import { supabase } from "@/lib/supabase";
+
+const useGameSettings = () => {
+  return useQuery({
+    queryKey: ["gameSettings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("game_settings")
+        .select("round_length_sec")
+        .limit(1)
+        .maybeSingle();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return { roundLengthSec: data?.round_length_sec ?? 60 };
+    },
+  });
 };
-export default useGameSettingsQuery;
+
+export default useGameSettings;

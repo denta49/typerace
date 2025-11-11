@@ -7,7 +7,7 @@ import IdentityState from "@/types/StoresTypes/IdentityStateType";
 
 const initialData: Omit<
   IdentityState,
-  "hydrateFromPlayer" | "setUsername" | "setGuest" | "setUser" | "reset"
+  "hydrateFromPlayer" | "setUsername" | "setGuest" | "setUser" | "reset" | "setPlayerId"
 > = {
   playerId: null,
   kind: "guest",
@@ -33,6 +33,7 @@ const useIdentityStore = create<IdentityState>()(
       setUsername: (username) => set({ username }),
 
       setGuest: (guestId) => set({ guestId, kind: "guest", userId: null }),
+      setPlayerId: (playerId) => set({ playerId }),
 
       setUser: (userId) => set({ userId, kind: "user", guestId: null }),
 
@@ -40,7 +41,6 @@ const useIdentityStore = create<IdentityState>()(
     }),
     {
       name: "identity",
-      // zapisujemy tylko to, co ma sens w localStorage
       partialize: (s) => ({
         kind: s.kind,
         guestId: s.guestId,

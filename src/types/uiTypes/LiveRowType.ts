@@ -1,8 +1,10 @@
+import { PlayerRow, ResultRow } from "@/validation/db";
+
 export interface LiveRowType {
-  playerId: string;
-  username: string;
-  progressText: string;
-  wpm: number;
-  accuracy: number;
+  playerId: ResultRow["id"];
+  username: PlayerRow["username"];
+  progressText: ResultRow["sentence_text"];
+  wpm: ResultRow["wpm"];
+  accuracy: ResultRow["accuracy"];
   updatedAt: number;
 }

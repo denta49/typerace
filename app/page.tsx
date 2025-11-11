@@ -1,18 +1,30 @@
+// app/page.tsx
+import { Suspense } from "react";
+
+import ReactQueryProvider from "@/data/QueryProvider";
 import Footer from "@/ui/Footer";
 import Game from "@/ui/Game";
 import Navbar from "@/ui/Navbar";
 
+export const metadata = {
+  title: "Tonik Typerace Challenge",
+  description: "Coding challenge for Tonik",
+};
+
 export default function Home() {
   return (
-    <>
-      <header></header>
-      <Navbar title={"Tonik Typerace Challenge"} />
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between bg-white px-16 py-32 sm:items-start dark:bg-black">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+    <ReactQueryProvider>
+      <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
+        <Navbar title="Tonik Typerace Challenge" />
+      </header>
+
+      <main className="container mx-auto max-w-4xl px-4 py-8">
+        <Suspense fallback={<div className="text-muted-foreground text-sm">Loading game…</div>}>
           <Game />
-        </div>
+        </Suspense>
       </main>
-      <Footer text={"© 2025 Tonik Typerace Challenge"} />
-    </>
+
+      <Footer text="© 2025 Tonik Typerace Challenge" />
+    </ReactQueryProvider>
   );
 }

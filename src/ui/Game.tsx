@@ -1,103 +1,180 @@
 "use client";
 
+import { useEffect, useMemo, useRef } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import columnsAllTime from "@/ui/ColumnsAllTime";
-import columnsLive from "@/ui/ColumnsLive";
-import DataTable from "@/ui/DataTable";
-import Sentence from "@/ui/Sentence";
-import SentenceInput from "@/ui/SentenceInput";
-import Timer from "@/ui/Timer";
+import useAllTimeLeaderboardQuery from "@/data/useAllTimeLeaderboardQuery";
+import useInsertResultMutation from "@/data/useInsertResultMutation";
+import { useSentencesQuery } from "@/data/useSentencesQuery";
+import useEnsureIdentity from "@/logic/hooks/useEnsureIdentity";
+import useGameSettings from "@/logic/hooks/useGameSettings";
+import useRealtimeLobby from "@/logic/hooks/useRealtimeLobby";
+import useRoundTimer from "@/logic/hooks/useRoundTimer";
+import useStableClientId from "@/logic/hooks/useStableClientId";
+import useTableSortingFromUrl from "@/logic/hooks/usetableSortingFormUrl";
+import usePresenceStore from "@/logic/stores/usePresenceStore";
+import useTypingStore from "@/logic/stores/useTypingStore";
+import useUiStore from "@/logic/stores/useUiStore";
+import deterministicSentenceIndex from "@/logic/utils/deterministicSentenceIndex";
+import CurrentRound from "@/ui/CurrentRound";
+import Leaderboard from "@/ui/Leaderboard";
+import LiveResults from "@/ui/LiveResults";
 
-const emptyLive: any[] = [];
-const emptyLeader: any[] = [];
+export default function Game() {
+  const { roundMs } = useGameSettings();
+  const { roundId, leftMs, elapsedMs, totalMs } = useRoundTimer({ roundMs });
 
-export const Game = () => {
-  // const { roundMs } = useGameSettings();
-  // const { roundId, leftMs, elapsedMs, totalMs } = useRoundTimer({ roundMs });
-  // const { sentence } = useMemo(() => pickSentence(roundId), [roundId]);
-  // const { readLiveParams, writeLiveParams, readAllParams, writeAllParams } = useUrlState();
-  // const liveParams = readLiveParams(); const allParams = readAllParams();
-  // const liveRows = usePresenceStore(selectLiveRowsMemoized); // realtime
-  // const { data: leaderRows, isLoading: leaderLoading } = useAllTimeLeaderboardQuery(...);
+  const { data: sentences, isPending: sentencesPending, isError, error } = useSentencesQuery();
+  const sentence =
+    sentences && sentences.length
+      ? sentences[deterministicSentenceIndex(roundId, sentences.length)].text
+      : "";
 
-  const totalMs = 60_000;
-  const leftMs = 60_000;
-  const sentence = "The quick brown fox jumps over the lazy dog.";
-  const leaderLoading = false;
+  const { playerId, guestId, username } = useEnsureIdentity();
+
+  const clientId = useStableClientId();
+  const effectivePlayerId = playerId ?? guestId ?? "guest-temp";
+  const { sendProgress } = useRealtimeLobby({
+    clientId,
+    playerId: effectivePlayerId,
+    username,
+  });
+
+  const playersMap = usePresenceStore((s) => s.players);
+  const liveRows = useMemo(
+    () =>
+      Array.from(playersMap.values()).map((p) => ({
+        playerId: p.playerId,
+        username: p.username,
+        progressText: p.progressText,
+        wpm: p.wpm,
+        accuracy: p.accuracy,
+        updatedAt: p.updatedAt,
+      })),
+    [playersMap],
+  );
+
+  const {
+    allPage,
+    allPageSize,
+    livePage,
+    livePageSize,
+    setAllPage,
+    setAllPageSize,
+    setLivePage,
+    setLivePageSize,
+  } = useUiStore();
+
+  const {
+    readLiveParams,
+    writeLiveParams,
+    readAllParams,
+    writeAllParams,
+    liveSorting,
+    handleLiveSortChange,
+    allSorting,
+    handleAllSortChange,
+  } = useTableSortingFromUrl();
+
+  useEffect(() => {
+    const lp = readLiveParams();
+    const ap = readAllParams();
+    if (livePage !== lp.page) setLivePage(lp.page);
+    if (livePageSize !== lp.pageSize) setLivePageSize(lp.pageSize);
+    if (allPage !== ap.page) setAllPage(ap.page);
+    if (allPageSize !== ap.pageSize) setAllPageSize(ap.pageSize);
+  }, [
+    readLiveParams,
+    readAllParams,
+    allPage,
+    allPageSize,
+    livePage,
+    livePageSize,
+    setAllPage,
+    setAllPageSize,
+    setLivePage,
+    setLivePageSize,
+  ]);
+
+  const { data: leaderRows = [], isPending: leaderLoading } = useAllTimeLeaderboardQuery({
+    range: "all",
+  });
+
+  const insertResult = useInsertResultMutation();
+  const { correctChars, totalChars, wpm, accuracy } = useTypingStore();
+  const submittedRoundRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (leftMs > 0) return;
+    if (!roundId || !sentence || !playerId) return;
+    if (submittedRoundRef.current === roundId) return;
+    submittedRoundRef.current = roundId;
+
+    insertResult.mutate({
+      roundId,
+      playerId,
+      wpm,
+      accuracy,
+      correctChars,
+      totalChars,
+      sentenceText: sentence,
+    });
+  }, [leftMs, roundId, sentence, playerId, wpm, accuracy, correctChars, totalChars, insertResult]);
 
   return (
     <div className="w-full space-y-8">
       <Card className="p-4 sm:p-6">
-        <header className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Current round</h2>
-          <Timer
-            secondsLeft={Math.max(0, Math.round(leftMs / 1000))}
-            total={Math.round(totalMs / 1000)}
-          />
-        </header>
-
-        <div className="mb-4">
-          <Sentence sentence={sentence} />
-        </div>
-
-        {/*<div className="mb-3">*/}
-        {/*  <State wpm={0} accuracy={0} />*/}
-        {/*</div>*/}
-
-        <div className="mb-6">
-          <SentenceInput
-            value={""}
-            onChange={(_v) => {
-              // TODO: useTypingEngine().onChange(v)
-            }}
-            disabled={false}
-            placeholder="Start typing here…"
-          />
-        </div>
+        <CurrentRound
+          secondsLeft={Math.max(0, Math.round(leftMs / 1000))}
+          totalSeconds={Math.round(totalMs / 1000)}
+          sentencePending={sentencesPending}
+          sentenceError={isError ? (error as Error).message : ""}
+          sentenceText={sentence || "No sentences configured"}
+          typingProps={{
+            sentence,
+            round: { roundId, leftMs, elapsedMs, totalMs },
+            sendProgress,
+          }}
+        />
 
         <Separator className="my-4" />
 
-        <section aria-label="Live results this round" className="mt-4">
-          <h3 className="text-muted-foreground mb-3 text-sm font-medium">Live results</h3>
-
-          {/* TODO: useUrlState + useUiStore */}
-          <DataTable
-            columns={columnsLive}
-            data={emptyLive}
-            page={1}
-            pageSize={10}
-            onPageChange={() => {}}
-            onPageSizeChange={() => {}}
-          />
-        </section>
+        <LiveResults
+          rows={liveRows}
+          page={livePage}
+          pageSize={livePageSize}
+          sorting={liveSorting}
+          onSortingChange={handleLiveSortChange}
+          onPageChange={(p) => {
+            setLivePage(p);
+            writeLiveParams({ page: p });
+          }}
+          onPageSizeChange={(s) => {
+            setLivePageSize(s);
+            writeLiveParams({ pageSize: s, page: 1 });
+          }}
+        />
       </Card>
 
       <Card className="p-4 sm:p-6">
-        <header className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">All-time leaderboard</h2>
-        </header>
-
-        {leaderLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-        ) : (
-          <DataTable
-            columns={columnsAllTime}
-            data={emptyLeader}
-            page={1}
-            pageSize={10}
-            onPageChange={() => {}}
-            onPageSizeChange={() => {}}
-          />
-        )}
+        <Leaderboard
+          loading={leaderLoading}
+          rows={leaderRows}
+          page={allPage}
+          pageSize={allPageSize}
+          sorting={allSorting}
+          onSortingChange={handleAllSortChange}
+          onPageChange={(p) => {
+            setAllPage(p);
+            writeAllParams({ page: p });
+          }}
+          onPageSizeChange={(s) => {
+            setAllPageSize(s);
+            writeAllParams({ pageSize: s, page: 1 });
+          }}
+        />
       </Card>
     </div>
   );
-};
-
-export default Game;
+}
